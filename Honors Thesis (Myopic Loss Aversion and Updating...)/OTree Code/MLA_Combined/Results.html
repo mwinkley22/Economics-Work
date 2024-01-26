@@ -1,0 +1,63 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Results{{ endblock }}
+
+{{ block content }}
+
+<figure class="highcharts-figure">
+  <div id="container"></div>
+</figure>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+
+
+<script>
+var chart =Highcharts.chart('container', {
+  chart: {
+    type: 'bar'
+  },
+  title: {
+    text: 'Percentage Return'
+  },
+  xAxis: {
+    categories: ['Fund A', 'Fund B', 'Your Overall Return'],
+    title: {
+      text: null
+    }
+  },
+  yAxis: {
+    min: -10,
+    max: 10,
+    title: {
+      text: 'Percentage Return',
+      align: 'high'
+    },
+  },
+  plotOptions: {
+    bar: {
+      dataLabels: {
+        enabled: true
+      }
+    },
+    series: {
+            enableMouseTracking: false
+        }
+  },
+  
+  credits: {
+    enabled: false
+  },
+
+  series: [{
+    showInLegend: false,             
+    data: [js_vars.fund_a_return, js_vars.fund_b_return, js_vars.combined_return]
+  }]
+});
+
+</script>
+{{ next_button }}
+
+{{ endblock }}

@@ -1,0 +1,23 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Decision{{ endblock }}
+
+{{ block content }}
+
+<p>
+    As a percentage of your funds, how much you would like to allocate to Fund A? (0-100)
+    
+    (As a reminder: everything not allocated to Fund A will be allocated to Fund B )
+</p>
+<p>
+    REMINDER: Any assets allocated to Fund A have a guaranteed return greater than 0%. In other words, there is no chance of a negative return for Fund A. This statement does not apply to Fund B.
+</p>
+
+<p>
+IMPORTANT NOTE: Any assets allocated to Fund A have a guaranteed return greater than 0%. In other words, there is no chance of a negative return for Fund A. This statement does not apply to Fund B.   
+</p>
+
+{{ formfields }}
+
+{{ next_button }}
+
+{{ endblock }}

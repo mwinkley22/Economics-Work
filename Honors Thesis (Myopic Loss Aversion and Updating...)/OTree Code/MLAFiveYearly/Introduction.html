@@ -1,0 +1,30 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Introduction{{ endblock }}
+
+{{ block content }}
+
+ 
+<p>
+This experiment simulates a series of investment decisions.
+ In this experiment, imagine that you are the investment
+ manager for a small college's endowment. Every forty financial periods you must decide how you wish to split the college's assets  between two investments, which we label "Fund A" and "Fund B."  
+</p>
+ 
+
+<p>
+You will be asked how much you wish to allocate to Fund A, an  integer from 0 (allocate nothing to Fund A) to 100 (allocate all assets to Fund A). Whatever you do not allocate to Fund A is allocated to Fund B. 
+
+</p>
+
+ 
+<p>
+ After each decision you will receive information about the
+ performance of Fund A, Fund B, and your overall return based on your decision. The information will be displayed on the
+ screen as three bars showing the percentage return of Fund A,
+ Fund B, and your decision. You will then be
+ asked to make the decision for the next forty periods.
+</p>
+
+{{ next_button }}
+
+{{ endblock }}
