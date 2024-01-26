@@ -1,0 +1,46 @@
+use labexpalldata, clear
+rename participantid_in_session par_id
+drop if playerfund_a_allocation > 100
+bysort participant_current_app_name subsessionround_number: egen fund_a_allo_mean = mean(playerfund_a_allocation)
+
+graph twoway (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAMonthly", sort), ylabel(0(10)100) ytitle("Percentage Allocated to Fund A") xtitle("Period") title("Monthly")
+graph export monthly.png,replace
+
+graph twoway  (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAMonthlyInfo", sort), ylabel(0(10)100) ytitle("Percentage Allocated to Fund A") xtitle("Period") title("Monthly Info")
+graph export monthlyinfo.png,replace
+/*
+graph twoway (lfit playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAFiveYearly", sort) (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAFiveYearly", sort), ylabel(0(10)100) 
+graph export fiveyearly.pdf,replace
+*/
+set obs `=_N+1'
+replace fund_a_allo_mean = 47.64706 if _n==_N
+replace subsessionround_number = 200 if _n==_N
+replace participant_current_app_name = "MLAFiveYearlyInfo" if _n==_N
+replace subsessionround_number = 160 if subsessionround_number == 5 & participant_current_app_name == "MLAFiveYearlyInfo"
+replace subsessionround_number = 120 if subsessionround_number == 4 & participant_current_app_name == "MLAFiveYearlyInfo"
+replace subsessionround_number = 80 if subsessionround_number == 3 & participant_current_app_name == "MLAFiveYearlyInfo"
+replace subsessionround_number = 40 if subsessionround_number == 2 & participant_current_app_name == "MLAFiveYearlyInfo"
+replace subsessionround_number = 0 if subsessionround_number == 1 & participant_current_app_name == "MLAFiveYearlyInfo"
+
+graph twoway (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAFiveYearlyInfo",sort lpattern(dash_dot) connect(stairstep)), ylabel(0(10)100) ytitle("Percentage Allocated to Fund A") xlabel(0(50)200) xtitle("Period") title("Five Yearly Info")
+graph export fiveyearlyinfo.png,replace
+
+set obs `=_N+1'
+replace fund_a_allo_mean = 33.4375 if _n==_N
+replace subsessionround_number = 200 if _n==_N
+replace participant_current_app_name = "MLAFiveYearly" if _n==_N
+replace subsessionround_number = 160 if subsessionround_number == 5 & participant_current_app_name == "MLAFiveYearly"
+replace subsessionround_number = 120 if subsessionround_number == 4 & participant_current_app_name == "MLAFiveYearly"
+replace subsessionround_number = 80 if subsessionround_number == 3 & participant_current_app_name == "MLAFiveYearly"
+replace subsessionround_number = 40 if subsessionround_number == 2 & participant_current_app_name == "MLAFiveYearly"
+replace subsessionround_number = 0 if subsessionround_number == 1 & participant_current_app_name == "MLAFiveYearly"
+
+graph twoway (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAFiveYearly",sort lpattern(dash_dot) connect(stairstep)), ylabel(0(10)100) ytitle("Percentage Allocated to Fund A") xlabel(0(50)200) xtitle("Period") title("Five Yearly")
+graph export fiveyearly.png,replace
+
+graph twoway (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAMonthly", sort) (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAFiveYearly",sort lpattern(dash_dot) connect(stairstep)), ylabel(0(10)100) ytitle("Percentage Allocated to Fund A") xlabel(0(50)200) xtitle("Period") legend(order(1 "Monthly Without Info." 2 "Five-Yearly Without Info."))
+graph export figure1.png,replace
+
+graph twoway (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAMonthlyInfo", sort) (line fund_a_allo_mean subsessionround_number if participant_current_app_name == "MLAFiveYearlyInfo",sort lpattern(dash_dot) connect(stairstep)), ylabel(0(10)100) ytitle("Percentage Allocated to Fund A") xlabel(0(50)200) xtitle("Period") legend(order(1 "Monthly With Info." 2 "Five-Yearly With Info."))
+graph export figure2.png,replace
+
