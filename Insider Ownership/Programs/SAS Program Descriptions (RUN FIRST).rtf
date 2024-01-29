@@ -1,0 +1,14 @@
+File: */Economics-Work/Insider Ownership/Programs/SAS/tfndownload.sas
+Description: Interfaces with WRDS to download Thomson-Reuters Insider Ownership information for further processing
+
+File: */Economics-Work/Insider Ownership/Programs/SAS/tfnimport.sas
+Description: Applies data cleaning methodology, systematically correcting for "adjustments" of Thomson-Reuters for each shareholder of each firm
+
+File: */Economics-Work/Insider Ownership/Programs/SAS/tfnunique.sas
+Description: Selects insiders according to criteria outlined in "*/Insider Ownership/Notes/Construction Walkthrough and Methodology.docx*"
+
+
+Run Order:
+1. tfndownload.sas
+2. tfnimport.sas
+3. tfnunique.sas
