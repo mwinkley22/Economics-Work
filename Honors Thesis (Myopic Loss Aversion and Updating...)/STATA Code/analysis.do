@@ -6,65 +6,89 @@
 **Creates the labexpalldata.dta file
 
 **The following import statements eliminate "botched" sessions or pilot studies.
-import delimited using "/Users/myleswinkley/Dropbox/Honors Thesis/MLA Monthly Data/MLAMonthly_2022-02-16.csv", clear
+
+
+*Imports the "Monthly" treatment group data
+import delimited using "../Raw Experimental Data/MLAMonthly_2022-02-16.csv", clear
 drop if participant_index_in_pages != 1000
 drop if participant_is_bot==1
-save monthlynoinfoclean, replace
+save "../Cleaned Experimental Data (STATA)/monthlynoinfoclean.dta", replace
 
-
-import delimited using "/Users/myleswinkley/Dropbox/Honors Thesis/MonthlyInfo/MLAMonthly_2022-02-10.csv",clear
+*Imports the "Monthly Information" treatment group data
+import delimited using "../Raw Experimental Data/MLAMonthly_2022-02-10.csv",clear
 drop if participant_index_in_pages != 1000
 drop if participant_is_bot==1
-save monthlyinfoclean, replace
+save "../Cleaned Experimental Data (STATA)/monthlyinfoclean.dta", replace
 
-
-import delimited using "/Users/myleswinkley/Dropbox/Honors Thesis/MLA Five Yearly/MLAFiveYearly_2022-03-09.csv", clear
+*Imports the "Five Yearly" treatment group data, making sure to select only the sessions which were error-free
+import delimited using "../Raw Experimental Data/MLAFiveYearly_2022-03-09 (2).csv", clear
 drop if sessioncode != "t96dqzcx" & sessioncode != "pxzyofgo" & sessioncode != "aiib48gt"
 drop if participant_index_in_pages != 25
-save fiveyearlynoinfoclean, replace
+save "../Cleaned Experimental Data (STATA)/fiveyearlynoinfoclean.dta", replace
 
-import delimited using "/Users/myleswinkley/Dropbox/Honors Thesis/Data Analysis/MLAFiveYearlyInfo_2022-03-09 (1).csv", clear
+*Imports the "Five Yearly Information" treatment group data
+import delimited using "../Raw Experimental Data/MLAFiveYearlyInfo_2022-03-09 (1).csv", clear
 drop if participant_index_in_pages != 25
-save fiveyearlyinfoclean, replace
+save "../Cleaned Experimental Data (STATA)/fiveyearlyinfoclean.dta", replace
 
 
-use monthlynoinfoclean, clear
-append using monthlyinfoclean
-append using fiveyearlynoinfoclean
-append using fiveyearlyinfoclean
-save labexpalldata, replace
+use "../Cleaned Experimental Data (STATA)/monthlynoinfoclean.dta", clear
+append using "../Cleaned Experimental Data (STATA)/monthlyinfoclean.dta"
+append using "../Cleaned Experimental Data (STATA)/fiveyearlynoinfoclean.dta"
+append using "../Cleaned Experimental Data (STATA)/fiveyearlyinfoclean.dta"
+save "../Cleaned Experimental Data (STATA)/labexpalldata", replace
 **End of Data File Creation
+
+
+*Table Creation
+
+label variable subsessionround_number "Trial Number"
+label variable playerfund_a_allocation "Percentage Allocation to Fund A"
 
 ****Table 2 Creation***** 
 
-*Without Clustering
+
+**** Monthly
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAMonthly"
 est store monthly
 
+
+**** Monthly Information 
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAMonthlyInfo"
 est store monthlyinfo
 
+**** Five-Yearly 
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAFiveYearly"
 est store fiveyearly
 
+
+**** Five-Yearly Information
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAFiveYearlyInfo"
 est store fiveyearlyinfo
-*With Clustering
+
+**** Monthly
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAMonthly",cluster(participantcode)
-est store monthly
+est store monthlycluster
 
+**** Monthly Information
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAMonthlyInfo",cluster(participantcode)
-est store monthlyinfo
+est store monthlyinfocluster
 
+**** Five-Yearly
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAFiveYearly",cluster(participantcode)
-est store fiveyearly
+est store fiveyearlycluster
 
+**** Five-Yearly Information
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAFiveYearlyInfo",cluster(participantcode)
-est store fiveyearlyinfo
+est store fiveyearlyinfocluster
 
-estout using results_regression_clustered.txt, replace cells("b p" se)
+****
+
+esttab using "../Tables/table_one.csv", replace se 
+ 
+
+
 eststo clear
-
 
 *****
 
@@ -82,12 +106,9 @@ test [fiveyearly_mean]subsessionround_number=[monthly_mean]subsessionround_numbe
 suest fiveyearlyinfo monthlyinfo, vce(cluster participantid_in_session)
 test [fiveyearlyinfo_mean]subsessionround_number=[monthlyinfo_mean]subsessionround_number
 
-estout using results_regression_unclustered.txt, replace cells("b p" se)
-eststo clear
 
 
-
-**Robustness Checks
+****TRobustness Checks****
 reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAFiveYearly" & subsessionround_number > 2
 est store fiveyearly2
 
@@ -115,7 +136,7 @@ reg playerfund_a_allocation subsessionround_number if participant_current_app_na
 est store monthlyinfo
 ******
 
-
+****Table 5****
 drop if (participant_current_app_name == "MLAMonthlyInfo" | participant_current_app_name == "MLAMonthly") & (subsessionround_number!= 1 & subsessionround_number!= 41 & subsessionround_number!= 81 & subsessionround_number!= 121 & subsessionround_number!=161) 
 **selects for increcements of 40 to match b/w monthly and five-yearly
 gen five_yearly_equivalent_1 = 0 
@@ -129,6 +150,8 @@ replace info = 1 if participant_current_app_name=="MLAMonthlyInfo" | participant
 gen frequency = 0 
 replace frequency = 1 if participant_current_app_name=="MLAFiveYearly" | participant_current_app_name=="MLAFiveYearlyInfo"
 
+
+**Creating variables to match observations between treatment groups in terms of how "far" they are in the experiment
 replace five_yearly_equivalent_1 = 1 if (participant_current_app_name == "MLAFiveYearly" | participant_current_app_name == "MLAFiveYearlyInfo") & subsessionround_number == 1
 replace five_yearly_equivalent_1 = 1 if (participant_current_app_name == "MLAMonthly" | participant_current_app_name == "MLAMonthlyInfo") & subsessionround_number==1
 
@@ -148,6 +171,8 @@ replace subsessionround_number=2 if subsessionround_number==41
 replace subsessionround_number=3 if subsessionround_number==81
 replace subsessionround_number=4 if subsessionround_number==121
 replace subsessionround_number=5 if subsessionround_number==161
+***
+
 
 
 eststo: reg playerfund_a_allocation subsessionround_number if participant_current_app_name == "MLAMonthly", cluster(participantcode)
@@ -163,8 +188,7 @@ eststo: reg playerfund_a_allocation subsessionround_number if participant_curren
 est store fiveyearlyinfo
 
 estout using results_regression_clustered_round.txt, replace cells("b p" se)
-eststo clear
-
+est clear
 
 eststo: reg playerfund_a_allocation five_yearly_equivalent_2 five_yearly_equivalent_3 five_yearly_equivalent_4 five_yearly_equivalent_5 if participant_current_app_name == "MLAMonthly", cluster(participantcode)
 est store monthly
@@ -177,8 +201,8 @@ est store fiveyearly
 
 eststo: reg playerfund_a_allocation  five_yearly_equivalent_2 five_yearly_equivalent_3 five_yearly_equivalent_4 five_yearly_equivalent_5 if participant_current_app_name == "MLAFiveYearlyInfo", cluster(participantcode)
 est store fiveyearlyinfo
-estout using results_regression_clustered_round_dummy.txt, replace cells("b p" se)
-eststo clear
+esttab using "../Tables/table_five.csv", replace se 
+est clear
 
 
 gen monthly_flag = ""
@@ -198,7 +222,7 @@ replace _info_flag = "MLAMonthlyInfo" if participant_current_app_name == "MLAMon
 replace _info_flag = "MLAFiveYearlyInfo" if participant_current_app_name == "MLAFiveYearlyInfo" 
 
 
-****Table 4****
+****Table 6****
 
 **Tests of Equality of First Allocations
 ttest playerfund_a_allocation if subsessionround_number==1, by(monthly_flag) unequal
@@ -212,14 +236,10 @@ ttest playerfund_a_allocation if subsessionround_number==5, by(yearly_flag) uneq
 ttest playerfund_a_allocation if subsessionround_number==5, by(no_info_flag) unequal
 ttest playerfund_a_allocation if subsessionround_number==5, by(_info_flag) unequal
 
+*****
 
-tabstat playerfund_a_allocation if participant_current_app_name == "MLAMonthly"
-tabstat playerfund_a_allocation if participant_current_app_name == "MLAFiveYearly"
-tabstat playerfund_a_allocation if participant_current_app_name == "MLAMonthlyInfo"
-tabstat playerfund_a_allocation if participant_current_app_name == "MLAFiveYearlyInfo"
 
-****
-
+****Table 6****
 tabstat playerfund_a_allocation if participant_current_app_name == "MLAMonthly" & subsessionround_number==1, statistics(n mean semean cv)
 tabstat playerfund_a_allocation if participant_current_app_name == "MLAFiveYearly" & subsessionround_number==1, statistics(n mean semean cv)
 tabstat playerfund_a_allocation if participant_current_app_name == "MLAMonthlyInfo" & subsessionround_number==1, statistics(n mean semean cv)

@@ -1,4 +1,4 @@
-use "../Cleaned Experimental Data (STATA)/labexpalldata.dta", clear
+use "../Cleaned Experimental Data (STATA)/labexpalldata, clear
 rename participantid_in_session par_id
 drop if playerfund_a_allocation > 100
 bysort participant_current_app_name subsessionround_number: egen fund_a_allo_mean = mean(playerfund_a_allocation)
